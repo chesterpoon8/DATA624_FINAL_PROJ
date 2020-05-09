@@ -136,7 +136,7 @@ test <- RF_with_Nulls(train,test,"PH",.5,5,10,.01,5,1)
 ## Data Split
 
 ```{r}
-set.seed(42)
+set.seed(8)
 train_index <- createDataPartition(train$PH, p = .7, list = FALSE, times = 1)
 training <- train[train_index,]
 testing <- train[-train_index,]
@@ -150,7 +150,7 @@ Xtest <- testing[,-grep("PH", colnames(testing))]
 ## Linear Regression
 
 ```{r}
-set.seed(42)
+set.seed(8)
 lm <- lm(PH~.,data = training)
 summary(lm)
 ```
@@ -158,7 +158,7 @@ summary(lm)
 ## Bagged Tree
 
 ```{r, warning=FALSE}
-set.seed(42)
+set.seed(8)
 bagControl = bagControl(fit = ctreeBag$fit, predict = ctreeBag$pred, aggregate = ctreeBag$aggregate)
 bag_model <- train(PH ~., 
                     data = training, method="bag", bagControl = bagControl,
@@ -188,7 +188,7 @@ xgbcv <- xgb.cv( params = params, data = trainingdmx, nrounds = 300, nfold = 5, 
 
 
 ```{r}
-set.seed(42)
+set.seed(8)
 xgb_model1 <- xgb.train (params = params, data = trainingdmx, nrounds = 260, watchlist = list(val=testingdmx,train=trainingdmx), print_every_n = 10, early_stop_round = 10, maximize = F)
 # Best result at iteration 211 for training and validation sets:
 ```
@@ -203,7 +203,7 @@ xgb.plot.importance (importance_matrix = mat)
 
 ```{r}
 ctrl = trainControl(method='cv', number = 10)
-set.seed(42)
+set.seed(8)
 svmRad <- train(PH ~.,
                 data=training,
                 method = "svmRadial",
@@ -218,7 +218,7 @@ postResample(obs = testing$PH, pred=svm_pred)
 ## Cubist
 
 ```{r}
-set.seed(42)
+set.seed(8)
 cubist <- train(PH ~., 
                 data = training,
                 method='cubist')
@@ -233,7 +233,7 @@ postResample(obs=testing$PH, pred=cubist_pred) # evaluate model over test set
 
 ```{r}
 ctrl = trainControl(method='cv', number = 10)
-set.seed(42)
+set.seed(8)
 rforest <- train(PH ~., 
                  data = training,
                  method = "ranger", 
@@ -255,7 +255,7 @@ for (brand_code in unique(training$`Brand Code`)){
   temp_df <- training %>%
     filter(`Brand Code` == brand_code) %>%
     select(-`Brand Code`)
-  set.seed(42)
+  set.seed(8)
   temp_rf <- train(PH ~ ., data = temp_df, method = "ranger", importance = "permutation", trControl = tc)
   print(temp_rf)
   print(varImp(temp_rf))
@@ -277,7 +277,7 @@ test <- kNN(test, imp_var=FALSE)
 colnames(test)<- make.names(colnames(test), unique=TRUE)
 
 ctrl = trainControl(method='cv', number = 10)
-set.seed(42)
+set.seed(8)
 rf_model <- train(PH ~., 
                  data = train,
                  method = "ranger", 
