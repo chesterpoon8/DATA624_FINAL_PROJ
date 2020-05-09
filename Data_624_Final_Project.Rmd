@@ -1,5 +1,5 @@
 ---
-title: "DATA 624 Final Prokect"
+title: "DATA 624 Final Project"
 date: "`r Sys.Date()`"
 output:
   rmdformats::readthedown:
@@ -10,7 +10,7 @@ output:
 
 # R Libraries
 
-```{r, echo = T, results = 'hide', include=FALSE}
+```{r, echo = T, results = 'hide'}
 library(caret)
 library(tidyverse)
 library(corrplot)
@@ -202,8 +202,8 @@ xgb.plot.importance (importance_matrix = mat)
 ## SVM
 
 ```{r}
-set.seed(42)
 ctrl = trainControl(method='cv', number = 10)
+set.seed(42)
 svmRad <- train(PH ~.,
                 data=training,
                 method = "svmRadial",
@@ -232,11 +232,12 @@ postResample(obs=testing$PH, pred=cubist_pred) # evaluate model over test set
 ## Random Forest
 
 ```{r}
-set.seed(42)
 ctrl = trainControl(method='cv', number = 10)
+set.seed(42)
 rforest <- train(PH ~., 
                  data = training,
-                 method = "rf",
+                 method = "ranger", 
+                 importance = "permutation",
                  tuneLength = 10,
                  trControl = ctrl
                  )
@@ -254,7 +255,7 @@ for (brand_code in unique(training$`Brand Code`)){
   temp_df <- training %>%
     filter(`Brand Code` == brand_code) %>%
     select(-`Brand Code`)
-  set.seed(seed)
+  set.seed(42)
   temp_rf <- train(PH ~ ., data = temp_df, method = "ranger", importance = "permutation", trControl = tc)
   print(temp_rf)
   print(varImp(temp_rf))
@@ -275,17 +276,18 @@ test <- pfile[,-grep("PH", colnames(pfile))]
 test <- kNN(test, imp_var=FALSE)
 colnames(test)<- make.names(colnames(test), unique=TRUE)
 
-set.seed(42)
 ctrl = trainControl(method='cv', number = 10)
+set.seed(42)
 rf_model <- train(PH ~., 
                  data = train,
-                 method = "rf",
+                 method = "ranger", 
+                 importance = "permutation",
                  tuneLength = 10,
                  trControl = ctrl
                  )
 
 final_rf_pred <- predict(rf_model, newdata=as.data.frame(test))
-pfile$PH <- final_rf_pred
+pfile$PH <- final_rf_pred # applying predictions to unimputed dataset
 
 write_xlsx(pfile, "Predictions_file.xlsx") # write to excel
 ```
